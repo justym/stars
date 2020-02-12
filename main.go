@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"image/color"
 	"log"
 	"math/rand"
@@ -66,6 +68,9 @@ func update(screen *ebiten.Image) error {
 		}
 	}
 	starFrame = (starFrame + 1) % len(stars)
+
+	tps,fps := ebiten.CurrentFPS(),ebiten.CurrentTPS()
+	ebitenutil.DebugPrint(screen,fmt.Sprintf("TPS: %0.2f\nFPS: %0.2f", tps,fps))
 	return nil
 }
 
