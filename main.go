@@ -2,82 +2,112 @@ package main
 
 import (
 	"fmt"
+	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/hajimehoshi/ebiten/vector"
 	"image/color"
 	"log"
 	"math/rand"
 	"time"
-
-	"github.com/hajimehoshi/ebiten"
 )
 
-const (
-	screenWidth  = 320
-	screenHeight = 240
-)
-
+//Type Star has own point values X,Y,Z,PZ (Previous Z)
 type Star struct {
-	Image *ebiten.Image
-	Color color.Color
 	X int
 	Y int
-	//Z int
+	Z int
+	PZ int
 }
 
-func (s *Star) Init(x,y int){
-	s.X = x
-	s.Y = y
-	//s.Z = x
-	s.Image,_ = ebiten.NewImage(screenWidth,screenHeight,ebiten.FilterDefault)
-	s.Color = color.White
-	s.Image.Set(s.X,s.Y,s.Color)
+//Set Method sets own values
+func (s *Star) Set(){
+	s.X = rand.Intn(screenWidth) - rand.Intn(screenWidth)
+	s.Y = rand.Intn(screenHeight) - rand.Intn(screenHeight)
+	s.Z = rand.Intn(screenWidth)
+	s.PZ = s.Z
 }
 
-/*func (s *Star) Update(){
-	err := s.Image.Clear()
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+//Update Method updates own values
+func (s *Star) Update(){
+	s.Z = s.Z - speed
+	if s.Z < 1 {
+		s.Z = screenWidth
+		s.X = rand.Intn(screenWidth) - rand.Intn(screenWidth)
+		s.Y = rand.Intn(screenHeight) - rand.Intn(screenHeight)
+		s.PZ = s.Z
 	}
-	s.Image.Set(s.X-10,s.Y-10,s.Color)
-}*/
+}
 
-//////////////////////ENTRY POINT FROM HERE///////////////////////////
-//var offscreen *ebiten.Image
-var stars = make([]Star,100)
+//Draw Method draw own star in screen
+func (s *Star) Draw(screen *ebiten.Image) error {
+	var path vector.Path
+	var drawOption = &vector.DrawPathOptions{
+		LineWidth:   5,
+		StrokeColor: color.White,
+	}
+
+	sx := float32(s.X / s.Z) + float32(s.X)
+	sy := float32(s.Y / s.Z) + float32(s.Y)
+
+	px := float32(s.X / s.PZ) + float32(s.X)
+	py := float32(s.Y / s.PZ) + float32(s.Y)
+
+	s.PZ = s.Z
+
+	path.MoveTo(sx,sy)
+	path.LineTo(px,py)
+
+	path.Draw(screen,drawOption)
+
+	return nil
+}
+
+const (
+	screenWidth = 600
+	screenHeight = 400
+	scale = 1
+	starCount = 500
+	speed = 1
+)
+
+var stars = make([]Star,starCount)
 
 func init() {
-	//offscreen, _ = ebiten.NewImage(screenWidth, screenHeight, ebiten.FilterDefault)
-	for i := 0; i < len(stars); i++ {
-		x := rand.Intn(screenWidth)
-		y := rand.Intn(screenHeight)
-		stars[i].Init(x, y)
+	for i := 0; i < starCount; i++ {
+		stars[i].Set()
 	}
 }
 
-var starFrame = 0
-func update(screen *ebiten.Image) error {
-	if ebiten.IsDrawingSkipped() {
+func screenUpdate(screen *ebiten.Image) error {
+	if ebiten.IsDrawingSkipped(){
 		return nil
 	}
 
-	for index := 0; index <= starFrame; index++ {
-		err := screen.DrawImage(stars[index].Image, nil)
-		if err != nil {
+	if err := screen.Fill(color.Black); err != nil{
+		return err
+	}
+
+	for i := 0; i < starCount; i++{
+		stars[i].Update()
+		if err := stars[i].Draw(screen); err != nil{
 			return err
 		}
 	}
-	starFrame = (starFrame + 1) % len(stars)
 
-	tps,fps := ebiten.CurrentFPS(),ebiten.CurrentTPS()
-	ebitenutil.DebugPrint(screen,fmt.Sprintf("TPS: %0.2f\nFPS: %0.2f", tps,fps))
+	fps,tps := ebiten.CurrentFPS(),ebiten.CurrentTPS()
+	if err := ebitenutil.DebugPrint(screen,fmt.Sprintf("FPS: %0.2f \nTPS: %0.2f \n",fps,tps)); err != nil{
+		return err
+	}
+
 	return nil
 }
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
-
-	if err := ebiten.Run(update, screenWidth, screenHeight, 2, "Star Fields"); err != nil {
+	if err := ebiten.Run(screenUpdate,screenWidth,screenHeight,scale,"Stars"); err != nil {
 		log.Fatal(err)
 	}
 }
+
+
+
