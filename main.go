@@ -13,17 +13,17 @@ import (
 
 //Type Star has own point values X,Y,Z,PZ (Previous Z)
 type Star struct {
-	X int
-	Y int
-	Z int
-	PZ int
+	X float32
+	Y float32
+	Z float32
+	PZ float32
 }
 
 //Set Method sets own values
 func (s *Star) Set(){
-	s.X = rand.Intn(screenWidth) - rand.Intn(screenWidth)
-	s.Y = rand.Intn(screenHeight) - rand.Intn(screenHeight)
-	s.Z = rand.Intn(screenWidth)
+	s.X = float32(rand.Intn(screenWidth) - rand.Intn(screenWidth))
+	s.Y = float32(rand.Intn(screenHeight) - rand.Intn(screenHeight))
+	s.Z = float32(rand.Intn(screenWidth))
 	s.PZ = s.Z
 }
 
@@ -32,9 +32,10 @@ func (s *Star) Update(){
 	s.Z = s.Z - speed
 	if s.Z < 1 {
 		s.Z = screenWidth
-		s.X = rand.Intn(screenWidth) - rand.Intn(screenWidth)
-		s.Y = rand.Intn(screenHeight) - rand.Intn(screenHeight)
+		s.X = float32(rand.Intn(screenWidth) - rand.Intn(screenWidth))
+		s.Y = float32(rand.Intn(screenHeight) - rand.Intn(screenHeight))
 		s.PZ = s.Z
+		//fmt.Printf("X: %0.2f Y: %0.2f Z: %0.2f PZ: %0.2f\n",s.X,s.Y,s.Z,s.PZ)
 	}
 }
 
@@ -48,6 +49,7 @@ func (s *Star) Draw(screen *ebiten.Image) error {
 
 	sx := float32(s.X / s.Z) + float32(s.X)
 	sy := float32(s.Y / s.Z) + float32(s.Y)
+
 
 	px := float32(s.X / s.PZ) + float32(s.X)
 	py := float32(s.Y / s.PZ) + float32(s.Y)
