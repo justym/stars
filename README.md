@@ -1,5 +1,5 @@
 # stars
-"Shooting Stars" 2D animation 
+2D animation using Ebiten
 ## Like Below
 ![gif](./assets/stars_nagative.gif)
 ## Using Packages
