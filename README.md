@@ -2,6 +2,6 @@
 2D animation using Ebiten
 ## Like Below
 ![gif](./assets/stars_nagative.gif)
-## Using Packages
+## Packages Used
  - [github.com/hajimehoshi/ebiten](https://github.com/hajimehoshi/ebiten)
  
